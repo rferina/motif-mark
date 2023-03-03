@@ -1,111 +1,145 @@
 import argparse
 import bioinfo
 import re
+import cairo
 
-# def get_args():
-#     """
-#     Adds global variables to run different specifications via command line.
-#     """
-#     parser = argparse.ArgumentParser(description="Specify parameters")
-#     parser.add_argument('-f', '--fasta', help='specify FASTA file')
-#     parser.add_argument('-m', '--motifs', help='specify motif file')
-#     return parser.parse_args()
+def get_args():
+    """
+    Adds global variables to run different specifications via command line.
+    """
+    parser = argparse.ArgumentParser(description="Specify parameters")
+    parser.add_argument('-f', '--fasta', help='specify FASTA file')
+    parser.add_argument('-m', '--motifs', help='specify motif file')
+    return parser.parse_args()
 
+# conda activate my_pycairo
+# command to run: python motif-mark-oop.py -f test_fa.fasta -m test_motif.txt
 
-# args = get_args()
+args = get_args()
 
-# # with open(args.fasta, 'r')
+fasta_file = args.fasta
+motifs_file = args.motifs
 
-class Position: 
-    """This class processes the FASTA file and obtains start and stop positions."""
-    def __init__(self, file):
-        """
-        Takes in a file path and initializes an
-        inverted index (a dictionary) with keys as the
-        term and values as the list of documents with
-        that term.
-        """
-        self.file = file 
-    
-    def oneline_fa(self):
-        '''Calls function in bioinfo.py that makes FASTA sequences on one line.
-        Writes out to the file fa_one_line.fa. Returns the number of records so they can be 
-        manually compared to the number of header lines in the output file, to confirm the output
-        file is accurate.'''
-        bioinfo.oneline_fasta(self)
-        # output_file = fa_one_line.fa
-    
-
-
-    def identify_positions(self):
-        '''Gets start and stop positions'''
-        pass
-        # identify case
-
-        # if case doesn't match, get end index -1
-
+# convert fasta file to one line fasta file
+oneline_file = bioinfo.oneline_fasta(fasta_file)
+print('one_line complete')
 
 
 def create_context(width, height):
-    '''Takes in desired width and heigth, returns the context for drawing.'''
+    '''Takes in desired width and height, returns the context for drawing.'''
     # create the coordinates to display your graphic, desginate output
     surface = cairo.PDFSurface("output.pdf", width, height)
     # create the coordinates you will be drawing on (like a transparency) - you can create a transformation matrix
     context = cairo.Context(surface)
-    return context
+    return surface, context
 
-# with open(path) as term_file:
+surface, context = create_context(800, 1000)
+
+
+# need to put in gene function
+# context.set_line_width(2)
+# context.move_to(100,75)        #(x,y)
+# context.line_to(600,75)
+# context.stroke()
+
+# # gene name
+# # context.set_font_size(0.25)
+# context.select_font_face("Arial",
+#                      cairo.FONT_SLANT_NORMAL,
+#                      cairo.FONT_WEIGHT_NORMAL)
+# context.move_to(50, 50)
+# context.show_text("Gene 1")
+
+# # exon 
+# context.set_line_width(10)
+# context.move_to(200,75)        #(x,y)
+# context.line_to(300,75)
+# context.stroke()
+
+# # motif
+# context.set_line_width(25)
+# context.set_source_rgba(4, 0, 4, 0.5)
+# context.move_to(100,75)        #(x,y)
+# context.line_to(105,75)
+# context.stroke()
+
+# motif
+
 
 
         
 class Identify:
-    def __init__(self, oneline_file) -> None:
-        self.oneline_file = oneline_file
+    '''Parse clean fasta'''
+    def __init__(self, oneline_fa) -> None:
+        self.oneline_fa = oneline_fa
     
     def parse_oneline(self):
         # while loop to read in two lines at a time
         header_dict = {}
         while True:
-            header = self.oneline_file.readline()
-            seq = self.oneline_file.readline()
+            header = self.oneline_fa.readline()
+            seq = self.oneline_fa.readline()
             if not seq: break  
             # double check header is correct
-            if header[0] == '<':
-                if header not in header_dict:
-                    header_dict[header] = seq
+            # if header[0] == '<':
+            if header not in header_dict:
+                header_dict[header] = seq
+        return header_dict
 
 
+class Gene:
+    def __init__(self, oneline_fa, gene_start, gene_stop, gene_name) -> None:
+        self.oneline_fa = oneline_fa
+        self.gene_start = gene_start
+        self.gene_stop = gene_stop
+        self.gene_name = gene_name
+     
 
-class Line:
-    '''Draws lines'''
-    def __init__(self, start, stop, kind) -> None:
-        self.start = start
-        self.stop = stop
-        self.kind = kind
+    def identify(self):
+        with open(self, 'r') as fa:
+            line_count = 0
+            for line in fa:
+                line_count +=1
+                line = line.strip('\n')
+                # avoid header lines
+                if line[0] != '>':
+                    # if first character is lowercase, then can assume it's the start pos of the intron
+                    if line[0].islower() == True:
+                        self.gene_start = 20
+                        if line[-1].islower() == True:
+                            self.gene_stop = len(line)
+        return self.gene_start, self.gene_stop
 
-    def draw(self, context, y):
-		'''Takes in context, draw a line on it which represents a gene, exon, motif etc'''
-		# if self.kind == 'exon':
-		
-		if self.kind == 'gene':
-            
-		
-		# elif self.kind == 'motif'':
+    def draw_gene(self):
+        # NEED TO FIGURE OUT HOW TO CHANGE y of LINE FOR DIFFERENT GENES
+        # draw gene
+        context.set_line_width(2)
+        context.move_to(self.gene_start, 75)        #(x,y)
+        context.line_to(self.gene_stop, 75)
+        context.stroke()
+        # add gene name
+        context.set_font_size(15)
+        context.select_font_face("Arial",
+                     cairo.FONT_SLANT_NORMAL,
+                     cairo.FONT_WEIGHT_NORMAL)
+        context.move_to(50, 50)
+        context.show_text(self.gene_name)
 
 
-######################################################################################
-class Exon:
-    def __init__(self, path):
+class Exon(Gene):
+    def __init__(self, exon_start, exon_stop):
+        # super().__init_subclass__ (exon_start, exon_stop):
         """
         Takes in a file path and initializes an
         inverted index (a dictionary) with keys as the
         term and values as the list of documents with
         that term.
         """
-        self.path = path
-
+        # self.path = path
+        self.exon_start = exon_start
+        self.exon_stop = exon_stop
+    
     def identify_exon(self):
-        '''Takes in oneline fasta file, identifies the start and stop positions of the exon.'''
         with open(self, 'r') as fa:
             line_count = 0
             for line in fa:
@@ -116,9 +150,138 @@ class Exon:
                     # if first character is lowercase, then can assume it's the start pos of the intron
                     if line[0].islower() == True:
                         print('yay')
-                        left_intron_start = 0
-                        exon = re.search(r'\B[A-Z]\B', line) 
-                        exon_start = exon.start()
+
+    def draw_exon(self):
+        context.set_line_width(10)
+        context.move_to(self.exon_start,75)        #(x,y)
+        context.line_to(self.exon_stop,75)
+        context.stroke()
+
+#     def identify_exon(self):
+#         '''Takes in oneline fasta file, identifies the start and stop positions of the exon.'''
+#         with open(self, 'r') as fa:
+#             line_count = 0
+#             for line in fa:
+#                 line_count +=1
+#                 line = line.strip('\n')
+#                 # avoid header lines
+#                 if line[0] != '>':
+#                     # if first character is lowercase, then can assume it's the start pos of the intron
+#                     if line[0].islower() == True:
+#                         print('yay')
+#                         left_intron_start = 0
+#                         exon = re.search(r'\B[A-Z]\B', line) 
+#                         exon_start = exon.start()
+
+
+
+# class Line:
+#     '''Draws lines'''
+#     def __init__(self, start, stop, kind) -> None:
+#         self.start = start
+#         self.stop = stop
+#         self.kind = kind
+
+    # def draw(self, context, y):
+	#     '''Takes in context, draw a line on it which represents a gene, exon, motif etc'''
+	#     if self.kind == 'gene':
+    #         # draw gene from start and stop
+    #         print('exon starting at', self.start, 'stop at', self.stop)
+            # context.set_line_width(5)
+            # context.set_source_rgba(4, 0, 4, 0.5)
+            # context.move_to(100,75)        #(x,y)
+            # context.line_to(600,75)
+            # context.stroke()
+
+            # surface.write_to_png ("gene.png")
+		
+        # elif self.kind == 'exon':
+
+		# elif self.kind == 'motif'':
+
+class Motif:
+    def __init__(self, motif_start, motif_stop) -> None:
+        self.motif_start = motif_start
+        self.motif_stop = motif_stop
+        
+    def draw_motifs(self):
+        context.set_line_width(25)
+        context.set_source_rgba(4, 0, 4, 0.5)
+        context.move_to(self.motif_start,75)        #(x,y)
+        context.line_to(self.motif_stop,75)
+        context.stroke()
+        
+    # add motifs to dict
+    # motifs = []
+    # for spec in specs: #specifications 13,19,'motif'
+    #     motif= Line(*spec) # explode an array
+    #     # store motif obj in list
+    #     motifs.append(motif)
+
+    # convert to uppercase
+    # motif_option = ''
+    # self.motif = self.motif.upper()
+
+    # for nuc in self.motif:
+    #     if letter in nuc_dict:
+    #         motif_option += nuc_dict[nuc]
+    #     # no conversion
+    #     else:
+    #         motif_option += nuc
+    # return motif_option
+
+
+# list of colors
+# start gene obj if not header line
+
+
+########### RUN STUFF #####################################################################
+# Position(fasta_file)
+mygene = Gene(600, 'gene ayooo')
+mygene.identify()
+mygene.draw_gene()
+
+myexon = Exon(200, 300)
+myexon.draw_exon()
+
+mymotif = Motif(100, 105)
+mymotif.draw_motifs()
+
+# print(Identify(oneline_file))
+# print('identified')
+
+surface.write_to_png ("gene_test.png")
+
+surface.finish()
+
+
+# with open, generate Gene obj for each line
+######################################################################################
+# class Exon:
+#     def __init__(self, path):
+#         """
+#         Takes in a file path and initializes an
+#         inverted index (a dictionary) with keys as the
+#         term and values as the list of documents with
+#         that term.
+#         """
+#         self.path = path
+
+#     def identify_exon(self):
+#         '''Takes in oneline fasta file, identifies the start and stop positions of the exon.'''
+#         with open(self, 'r') as fa:
+#             line_count = 0
+#             for line in fa:
+#                 line_count +=1
+#                 line = line.strip('\n')
+#                 # avoid header lines
+#                 if line[0] != '>':
+#                     # if first character is lowercase, then can assume it's the start pos of the intron
+#                     if line[0].islower() == True:
+#                         print('yay')
+#                         left_intron_start = 0
+#                         exon = re.search(r'\B[A-Z]\B', line) 
+#                         exon_start = exon.start()
 
 
 
@@ -137,18 +300,18 @@ class Exon:
 #         that term.
 #         """
 
-class Motif:
-    def __init__(self, path):
-        """
-        Takes in a file path and initializes an
-        inverted index (a dictionary) with keys as the
-        term and values as the list of documents with
-        that term.
-        """
-    def translate(motif):
-        '''Takes in a motif, and returns motif options if the 
-        motif contains an ambiguous character (y). Otherwise 
-        returns the original motif.'''
+# class Motif:
+#     def __init__(self, path):
+#         """
+#         Takes in a file path and initializes an
+#         inverted index (a dictionary) with keys as the
+#         term and values as the list of documents with
+#         that term.
+#         """
+#     def translate(motif):
+#         '''Takes in a motif, and returns motif options if the 
+#         motif contains an ambiguous character (y). Otherwise 
+#         returns the original motif.'''
         # put variations in list, see if in seq??
         # if line contains something not ACTGU?
         # if line has all caps
@@ -161,6 +324,7 @@ class Motif:
 
 
 
+##############################################################################################
 
     # dict with key as captialize, value is set of what it represents; if key in motif look in set
     # {Y:, (C, T)}
@@ -172,7 +336,7 @@ class Motif:
 
 
 
-
+# notes
 
 # could have diff num of motifs, exons, stick inside list dict or another object
 # "gene" 2 
@@ -189,6 +353,7 @@ class Motif:
 
 # dif color for each motif type
 
+################## TO DO########################################################################################
 # in MAIN 
 # parse args
 # define classes, functions, constants
@@ -227,6 +392,9 @@ class Motif:
 # could remove y parameter, instead put in draw method
 
 
+# # with open(args.fasta, 'r')
+
+
 # class Shape()
 #     pass
 # class Circle<Shape: # circle inherits from shape
@@ -236,26 +404,30 @@ class Motif:
 
 # # draw circles in pycairo class
 
+################### old MAIN ###################################################################
+# input = 'ygcy'    
+# output = input.replace("y", "[c|t]")
+# print(output)
 
-input = 'ygcy'    
-output = input.replace("y", "[c|t]")
-print(output)
-
-# detect change in case for start of exon
-test='aaaBDBcc'
-res = re.search(r'\B[A-Z]\B', test) # end not right
-print(res.start())
-# see if case == case at start pos to get end pos?
-# res2 = re.finditer(r'\B[A-Z]\B', test) # end not right
-for match in re.finditer(r'\B[A-Z]\B', test):
-    # print('end', match.end())
-    print(match.group(), "start index", match.start(), "End index", match.end()) # but end of exon is -1
+# # detect change in case for start of exon
+# test='aaaBDBcc'
+# res = re.search(r'\B[A-Z]\B', test) # end not right
+# print(res.start())
+# # see if case == case at start pos to get end pos?
+# # res2 = re.finditer(r'\B[A-Z]\B', test) # end not right
+# for match in re.finditer(r'\B[A-Z]\B', test):
+#     # print('end', match.end())
+#     print(match.group(), "start index", match.start(), "End index", match.end()) # but end of exon is -1
 
 
-Position.oneline_fa('Figure_1.fasta')
-# Position.oneline_fa('Figure_1.fasta', 'Figure_1.fasta')
+# Position.oneline_fa('Figure_1.fasta')
 
-Exon.identify_exon('fa_one_line.fa')
+# # Position.oneline_fa('Figure_1.fasta', 'Figure_1.fasta')
+
+# Exon.identify_exon('fa_one_line.fa')
+
+####################################################################################################
+
 
 # make exon object from data; could name, throw in dict or list
 
@@ -267,9 +439,9 @@ Exon.identify_exon('fa_one_line.fa')
 # object.draw(context)
 ##########################################
 # if __name__== "__main__":
-#     input = 'ygcy'    
-#     output = input.replace("y", "[c|t]")
-#     print(output)
+    # input = 'ygcy'    
+    # output = input.replace("y", "[c|t]")
+    # print(output)
 
 #     # detect change in case for start of exon
 #     test='aaaBDBcc'
