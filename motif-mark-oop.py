@@ -20,21 +20,63 @@ args = get_args()
 fasta_file = args.fasta
 motifs_file = args.motifs
 
+# generate output png filename
+png_name = fasta_file.split(".")[0]
+png_name = png_name + '.png'
+
+
+
 # convert fasta file to one line fasta file
 oneline_file = bioinfo.oneline_fasta(fasta_file)
+# oneline_file.write()
 print('one_line complete')
 
+# testing_file = open('fa_one_line.fa', 'r')
+# line_count = 0
+# for line in testing_file:
+#         line_count +=1
+#         line = line.strip('\n')
+#         # define gene name as header line
+#         if line[0] == '>':
+#             print('header')
+#         # define start and stop of gene from sequence line
+#         elif line[0] != '>':
+#             print('seq')
+
+# with open(oneline_file, 'r') as testing_file:
+#     line_count = 0
+#     for line in testing_file:
+#         line_count +=1
+#         line = line.strip('\n')
+#         # define gene name as header line
+#         if line[0] == '>':
+#             print('header')
+#         # define start and stop of gene from sequence line
+#         elif line[0] != '>':
+#             print('seq')
+
+print('oneline opened')
 
 def create_context(width, height):
     '''Takes in desired width and height, returns the context for drawing.'''
-    # create the coordinates to display your graphic, desginate output
+    # create the coordinates to display graphic, desginate output
     surface = cairo.PDFSurface("output.pdf", width, height)
-    # create the coordinates you will be drawing on (like a transparency) - you can create a transformation matrix
+    # create the coordinates to draw on
     context = cairo.Context(surface)
     return surface, context
 
+# create context to draw on
 surface, context = create_context(800, 1000)
 
+# make background white
+context.save()
+context.set_source_rgb(1, 1, 1)
+context.paint()
+context.restore()
+
+# context.rectangle(0, 0, 800, 1000)
+# context.set_source_rgb(1, 1, 1)
+# context.fill()
 
 # need to put in gene function
 # context.set_line_width(2)
@@ -68,54 +110,54 @@ surface, context = create_context(800, 1000)
 
 
         
-class Identify:
-    '''Parse clean fasta'''
-    def __init__(self, oneline_fa) -> None:
-        self.oneline_fa = oneline_fa
+# class Identify:
+#     '''Parse clean fasta'''
+#     def __init__(self, oneline_fa) -> None:
+#         self.oneline_fa = oneline_fa
     
-    def parse_oneline(self):
-        # while loop to read in two lines at a time
-        header_dict = {}
-        while True:
-            header = self.oneline_fa.readline()
-            seq = self.oneline_fa.readline()
-            if not seq: break  
-            # double check header is correct
-            # if header[0] == '<':
-            if header not in header_dict:
-                header_dict[header] = seq
-        return header_dict
+#     def parse_oneline(self):
+#         # while loop to read in two lines at a time
+#         header_dict = {}
+#         while True:
+#             header = self.oneline_fa.readline()
+#             seq = self.oneline_fa.readline()
+#             if not seq: break  
+#             # double check header is correct
+#             # if header[0] == '<':
+#             if header not in header_dict:
+#                 header_dict[header] = seq
+#         return header_dict
 
 
 class Gene:
-    def __init__(self, oneline_fa, gene_start, gene_stop, gene_name) -> None:
+    def __init__(self, oneline_fa, ) -> None:  # gene_start, gene_stop, gene_name
         self.oneline_fa = oneline_fa
-        self.gene_start = gene_start
-        self.gene_stop = gene_stop
-        self.gene_name = gene_name
-     
+        # self.gene_start = gene_start
+        # self.gene_stop = gene_stop
+        # self.gene_name = gene_name
+    
+    def draw_gene(self, gene_start, gene_stop, gene_name):
 
-    def identify(self):
-        with open(self, 'r') as fa:
+        with open(self.oneline_fa, 'r') as fa:
             line_count = 0
             for line in fa:
                 line_count +=1
                 line = line.strip('\n')
-                # avoid header lines
-                if line[0] != '>':
+                # define gene name as header line
+                if line[0] == '>':
+                    gene_name = line
+                # define start and stop of gene from sequence line
+                elif line[0] != '>':
                     # if first character is lowercase, then can assume it's the start pos of the intron
                     if line[0].islower() == True:
-                        self.gene_start = 20
+                        gene_start = 20
                         if line[-1].islower() == True:
-                            self.gene_stop = len(line)
-        return self.gene_start, self.gene_stop
+                            gene_stop = len(line)
 
-    def draw_gene(self):
-        # NEED TO FIGURE OUT HOW TO CHANGE y of LINE FOR DIFFERENT GENES
         # draw gene
         context.set_line_width(2)
-        context.move_to(self.gene_start, 75)        #(x,y)
-        context.line_to(self.gene_stop, 75)
+        context.move_to(gene_start, 75)        #(x,y)
+        context.line_to(gene_stop, 75)
         context.stroke()
         # add gene name
         context.set_font_size(15)
@@ -123,7 +165,42 @@ class Gene:
                      cairo.FONT_SLANT_NORMAL,
                      cairo.FONT_WEIGHT_NORMAL)
         context.move_to(50, 50)
-        context.show_text(self.gene_name)
+        context.show_text(gene_name)
+
+
+    # def identify(self, gene_start, gene_stop, gene_name):
+    #     # self.gene_start = gene_start
+    #     # self.gene_stop = gene_stop
+    #     # self.gene_name = gene_name
+
+    #     with open(self.oneline_fa, 'r') as fa:
+    #         line_count = 0
+    #         for line in fa:
+    #             line_count +=1
+    #             line = line.strip('\n')
+    #             # avoid header lines
+    #             if line[0] != '>':
+    #                 # if first character is lowercase, then can assume it's the start pos of the intron
+    #                 if line[0].islower() == True:
+    #                     gene_start = 20
+    #                     if line[-1].islower() == True:
+    #                         gene_stop = len(line)
+    #     return gene_start, gene_stop, gene_name
+
+    # def draw_gene(self):
+    #     # NEED TO FIGURE OUT HOW TO CHANGE y of LINE FOR DIFFERENT GENES
+    #     # draw gene
+    #     context.set_line_width(2)
+    #     context.move_to(gene_start, 75)        #(x,y)
+    #     context.line_to(gene_stop, 75)
+    #     context.stroke()
+    #     # add gene name
+    #     context.set_font_size(15)
+    #     context.select_font_face("Arial",
+    #                  cairo.FONT_SLANT_NORMAL,
+    #                  cairo.FONT_WEIGHT_NORMAL)
+    #     context.move_to(50, 50)
+    #     context.show_text(gene_name)
 
 
 class Exon(Gene):
@@ -237,9 +314,13 @@ class Motif:
 
 ########### RUN STUFF #####################################################################
 # Position(fasta_file)
-mygene = Gene(600, 'gene ayooo')
-mygene.identify()
-mygene.draw_gene()
+# mygene = Gene(600, 'gene ayooo')
+# mygene.identify()
+# mygene.draw_gene()
+
+mygene = Gene('fa_one_line.fa')
+# mygene = Gene(oneline_file, 100, 600, 'gene1 test')
+mygene.draw_gene(100, 600, 'gene2 test')
 
 myexon = Exon(200, 300)
 myexon.draw_exon()
@@ -250,12 +331,24 @@ mymotif.draw_motifs()
 # print(Identify(oneline_file))
 # print('identified')
 
-surface.write_to_png ("gene_test.png")
+
+
+surface.write_to_png (png_name)
 
 surface.finish()
 
 
 # with open, generate Gene obj for each line
+# with open(oneline_file, 'r') as one_fq:
+#     line_count = 0
+#     for line in fa:
+        # line_count +=1
+        # line = line.strip('\n')
+        # # for sequence line, initiate a gene object
+        # if line[0] != '>':
+        #     gene = Gene()
+
+
 ######################################################################################
 # class Exon:
 #     def __init__(self, path):

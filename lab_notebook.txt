@@ -1,0 +1,52 @@
+
+
+File "/home/rfer22/bioinfo/Bi625/motif/motif-mark/motif-mark-oop.py", line 107, in identify
+    with open(self, 'r') as fa:
+TypeError: expected str, bytes or os.PathLike object, not Gene
+
+changed to with open(self.oneline_fa, 'r') as fa:
+got this error
+OSError: [Errno 9] Bad file descriptor
+
+could be closing a file that's not open, or reading it in the wrong mode.
+
+Tried making gene_start, gene_stop, and gene_name variables rather than self.variables.
+File "/home/rfer22/bioinfo/Bi625/motif/motif-mark/motif-mark-oop.py", line 256, in <module>
+    mygene.draw_gene()
+  File "/home/rfer22/bioinfo/Bi625/motif/motif-mark/motif-mark-oop.py", line 127, in draw_gene
+    context.move_to(gene_start, 75)        #(x,y)
+NameError: name 'gene_start' is not defined
+
+trying combining the identify and draw functions.
+
+
+
+Tried this, still getting error 9, testing_file = open(oneline_fa, 'r')
+
+Realized bioinfo.oneline function is outputing the file as fa_one_line.fa, so tried this:
+testing_file = open('fa_one_line.fa', 'r')
+line_count = 0
+for line in testing_file:
+        line_count +=1
+        line = line.strip('\n')
+        # define gene name as header line
+        if line[0] == '>':
+            print('header')
+        # define start and stop of gene from sequence line
+        elif line[0] != '>':
+            print('seq')
+
+As expected, got this output
+one_line complete
+header
+seq
+header
+seq
+header
+seq
+oneline opened
+
+changed mygene = Gene(oneline_fa) to mygene = Gene('fa_one_line.fa')
+and it ran! 
+
+
