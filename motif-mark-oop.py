@@ -31,17 +31,7 @@ oneline_file = bioinfo.oneline_fasta(fasta_file)
 # oneline_file.write()
 print('one_line complete')
 
-# testing_file = open('fa_one_line.fa', 'r')
-# line_count = 0
-# for line in testing_file:
-#         line_count +=1
-#         line = line.strip('\n')
-#         # define gene name as header line
-#         if line[0] == '>':
-#             print('header')
-#         # define start and stop of gene from sequence line
-#         elif line[0] != '>':
-#             print('seq')
+
 
 # with open(oneline_file, 'r') as testing_file:
 #     line_count = 0
@@ -55,7 +45,7 @@ print('one_line complete')
 #         elif line[0] != '>':
 #             print('seq')
 
-print('oneline opened')
+# print('oneline opened')
 
 def create_context(width, height):
     '''Takes in desired width and height, returns the context for drawing.'''
@@ -66,7 +56,7 @@ def create_context(width, height):
     return surface, context
 
 # create context to draw on
-surface, context = create_context(800, 1000)
+surface, context = create_context(1000, 1200)
 
 # make background white
 context.save()
@@ -130,42 +120,70 @@ context.restore()
 
 
 class Gene:
-    def __init__(self, oneline_fa, ) -> None:  # gene_start, gene_stop, gene_name
-        self.oneline_fa = oneline_fa
-        # self.gene_start = gene_start
-        # self.gene_stop = gene_stop
-        # self.gene_name = gene_name
+    def __init__(self, oneline_fasta,  gene_start, gene_stop, gene_name, gene_number) -> None:  # gene_start, gene_stop, gene_name
+        self.oneline_fa = oneline_fasta
+        self.gene_start = gene_start
+        self.gene_stop = gene_stop
+        self.gene_name = gene_name
+        self.gene_number = gene_number
     
-    def draw_gene(self, gene_start, gene_stop, gene_name):
-
-        with open(self.oneline_fa, 'r') as fa:
-            line_count = 0
-            for line in fa:
-                line_count +=1
-                line = line.strip('\n')
-                # define gene name as header line
-                if line[0] == '>':
-                    gene_name = line
-                # define start and stop of gene from sequence line
-                elif line[0] != '>':
-                    # if first character is lowercase, then can assume it's the start pos of the intron
-                    if line[0].islower() == True:
-                        gene_start = 20
-                        if line[-1].islower() == True:
-                            gene_stop = len(line)
-
+    def draw_gene(self):
         # draw gene
         context.set_line_width(2)
-        context.move_to(gene_start, 75)        #(x,y)
-        context.line_to(gene_stop, 75)
-        context.stroke()
-        # add gene name
-        context.set_font_size(15)
-        context.select_font_face("Arial",
-                     cairo.FONT_SLANT_NORMAL,
-                     cairo.FONT_WEIGHT_NORMAL)
-        context.move_to(50, 50)
-        context.show_text(gene_name)
+        if self.gene_number == 1:
+            context.move_to(self.gene_start, 75)        #(x,y)
+            context.line_to(self.gene_stop, 75)
+            context.stroke()
+            # add gene name
+            context.set_font_size(15)
+            context.select_font_face("Arial",
+                        cairo.FONT_SLANT_NORMAL,
+                        cairo.FONT_WEIGHT_NORMAL)
+            context.move_to(50, 50)
+            context.show_text(self.gene_name)
+        elif self.gene_number > 1:
+            y_val = self.gene_number * 75
+            context.move_to(self.gene_start, y_val)        #(x,y)
+            context.line_to(self.gene_stop, y_val)
+            context.stroke()
+            # add gene name
+            context.set_font_size(15)
+            context.select_font_face("Arial",
+                        cairo.FONT_SLANT_NORMAL,
+                        cairo.FONT_WEIGHT_NORMAL)
+            context.move_to(50, y_val-25)
+            context.show_text(self.gene_name)
+
+    # def draw_gene(self, gene_start, gene_stop, gene_name):
+
+    #     with open(self.oneline_fa, 'r') as fa:
+    #         line_count = 0
+    #         for line in fa:
+    #             line_count +=1
+    #             line = line.strip('\n')
+    #             # define gene name as header line
+    #             if line[0] == '>':
+    #                 gene_name = line
+    #             # define start and stop of gene from sequence line
+    #             elif line[0] != '>':
+    #                 # if first character is lowercase, then can assume it's the start pos of the intron
+    #                 if line[0].islower() == True:
+    #                     gene_start = 0
+    #                     if line[-1].islower() == True:
+    #                         gene_stop = len(line)
+
+    #     # draw gene
+    #     context.set_line_width(2)
+    #     context.move_to(gene_start, 75)        #(x,y)
+    #     context.line_to(gene_stop, 75)
+    #     context.stroke()
+    #     # add gene name
+    #     context.set_font_size(15)
+    #     context.select_font_face("Arial",
+    #                  cairo.FONT_SLANT_NORMAL,
+    #                  cairo.FONT_WEIGHT_NORMAL)
+    #     context.move_to(50, 50)
+    #     context.show_text(gene_name)
 
 
     # def identify(self, gene_start, gene_stop, gene_name):
@@ -216,24 +234,30 @@ class Exon(Gene):
         self.exon_start = exon_start
         self.exon_stop = exon_stop
     
-    def identify_exon(self):
-        with open(self, 'r') as fa:
-            line_count = 0
-            for line in fa:
-                line_count +=1
-                line = line.strip('\n')
-                # avoid header lines
-                if line[0] != '>':
-                    # if first character is lowercase, then can assume it's the start pos of the intron
-                    if line[0].islower() == True:
-                        print('yay')
+    # def identify_exon(self):
+    #     with open(self, 'r') as fa:
+    #         line_count = 0
+    #         for line in fa:
+    #             line_count +=1
+    #             line = line.strip('\n')
+    #             # avoid header lines
+    #             if line[0] != '>':
+    #                 # if first character is lowercase, then can assume it's the start pos of the intron
+    #                 if line[0].islower() == True:
+    #                     print('yay')
 
     def draw_exon(self):
-        context.set_line_width(10)
-        context.move_to(self.exon_start,75)        #(x,y)
-        context.line_to(self.exon_stop,75)
-        context.stroke()
-
+        if gene_1.gene_number == 1:
+            context.set_line_width(10)
+            context.move_to(self.exon_start,75)        #(x,y)
+            context.line_to(self.exon_stop,75)
+            context.stroke()
+        elif gene_1.gene_number > 1:
+            context.set_line_width(10)
+            y_val = gene_1.gene_number * 75
+            context.move_to(self.exon_start, y_val)        #(x,y)
+            context.line_to(self.exon_stop, y_val)
+            context.stroke()
 #     def identify_exon(self):
 #         '''Takes in oneline fasta file, identifies the start and stop positions of the exon.'''
 #         with open(self, 'r') as fa:
@@ -282,12 +306,20 @@ class Motif:
         self.motif_stop = motif_stop
         
     def draw_motifs(self):
-        context.set_line_width(25)
-        context.set_source_rgba(4, 0, 4, 0.5)
-        context.move_to(self.motif_start,75)        #(x,y)
-        context.line_to(self.motif_stop,75)
-        context.stroke()
-        
+        if gene_1.gene_number == 1:
+            context.set_line_width(25)
+            context.set_source_rgba(4, 0, 4, 0.5)
+            context.move_to(self.motif_start,75)        #(x,y)
+            context.line_to(self.motif_stop,75)
+            context.stroke()
+        elif gene_1.gene_number > 1:
+            y_val = gene_1.gene_number * 75
+            context.set_line_width(25)
+            context.set_source_rgba(4, 0, 4, 0.5)
+            context.move_to(self.motif_start, y_val)        #(x,y)
+            context.line_to(self.motif_stop, y_val)
+            context.stroke()
+
     # add motifs to dict
     # motifs = []
     # for spec in specs: #specifications 13,19,'motif'
@@ -318,27 +350,65 @@ class Motif:
 # mygene.identify()
 # mygene.draw_gene()
 
-mygene = Gene('fa_one_line.fa')
-# mygene = Gene(oneline_file, 100, 600, 'gene1 test')
-mygene.draw_gene(100, 600, 'gene2 test')
+# mygene = Gene('fa_one_line.fa')
+# # mygene = Gene(oneline_file, 100, 600, 'gene1 test')
+# mygene.draw_gene(100, 600, 'gene2 test')
 
-myexon = Exon(200, 300)
-myexon.draw_exon()
+# myexon = Exon(200, 300)
+# myexon.draw_exon()
 
-mymotif = Motif(100, 105)
-mymotif.draw_motifs()
+# mymotif = Motif(100, 105)
+# mymotif.draw_motifs()
 
 # print(Identify(oneline_file))
 # print('identified')
 
 
 
-surface.write_to_png (png_name)
 
-surface.finish()
 
 
 # with open, generate Gene obj for each line
+testing_file = open('fa_one_line.fa', 'r')
+line_count = 0
+gene_num = 0
+for line in testing_file:
+        line_count +=1
+        line = line.strip('\n')
+        # define gene name as header line
+        if line[0] == '>':
+            gene_id = line
+            gene_id = gene_id.split('>')[1]
+        # define start and stop of gene from sequence line
+        elif line[0] != '>':
+            gene_beg = 100 
+            gene_end = len(line) + gene_beg
+            gene_num += 1
+            # make gene object
+            gene_1 = Gene(testing_file, gene_beg, gene_end, gene_id, gene_num)
+            print('made obj')
+            gene_1.draw_gene()
+            print('drew')
+
+            print(gene_1.gene_number)
+            # define exon terms
+            exon_indexes = []
+            for match in re.finditer(r'[A-Z]', line):
+                exon_indexes.append(match.start())
+                ex_st = exon_indexes[0] + 100
+                ex_en = exon_indexes[-1] + 100
+                myexon = Exon(ex_st, ex_en)
+                myexon.draw_exon()
+            print(ex_st, ex_en)
+            # exon = re.search(r'\B[A-Z]\B', line) 
+            # exon_beg = exon.start()
+            # exon_end = 
+            # make exon object
+            # myexon = Exon(ex_st, ex_en)
+            # myexon.draw_exon()
+
+
+
 # with open(oneline_file, 'r') as one_fq:
 #     line_count = 0
 #     for line in fa:
@@ -348,6 +418,10 @@ surface.finish()
         # if line[0] != '>':
         #     gene = Gene()
 
+
+# complete drawing
+surface.write_to_png (png_name)
+surface.finish()
 
 ######################################################################################
 # class Exon:
@@ -503,14 +577,29 @@ surface.finish()
 # print(output)
 
 # # detect change in case for start of exon
-# test='aaaBDBcc'
+test='aaaBDBcc' # 3-5
 # res = re.search(r'\B[A-Z]\B', test) # end not right
-# print(res.start())
-# # see if case == case at start pos to get end pos?
-# # res2 = re.finditer(r'\B[A-Z]\B', test) # end not right
+# print(res.end()) # start is pos with 0 indexing
+
+# res = [idx for idx in range(len(test)) if test[idx].isupper()]
+# print(res)
+
+# res2 = [match.start() for match in re.finditer(r'[A-Z]', test)]
+# print(res2[0], res2[-1])
+# res3 = []
+# for match in re.finditer(r'[A-Z]', test):
+#     res3.append(match.start())
+#     ex_st = res3[0]
+#     ex_en = res3[-1]
+# print(ex_st, ex_en)
+# print(res3)
+
+# see if case == case at start pos to get end pos?
+# res2 = re.finditer(r'\B[A-Z]\B', test) # end not right
 # for match in re.finditer(r'\B[A-Z]\B', test):
-#     # print('end', match.end())
-#     print(match.group(), "start index", match.start(), "End index", match.end()) # but end of exon is -1
+# #     # print('end', match.end())
+#     print("start index", match.start(), "End index", match.end())
+    # print(match.group(), "start index", match.start(), "End index", match.end()) # but end of exon is -1
 
 
 # Position.oneline_fa('Figure_1.fasta')
@@ -561,32 +650,3 @@ surface.finish()
 
 # newObject = originalString.replace('character to replace', 'character to be replaced with, count of replacements to perform)
 
-
-
-#  def bioinfo.oneline_fasta(file):
-        # '''Makes FASTA sequences on one line. Writes out to the file
-        # fa_one_line.fa. Returns the number of records so they can be
-        # manually compared to the number of header lines in the output file,
-        # to confirm the output file is accurate.'''
-        # # make dict with headers as keys and sequences as values
-        # seq_dict = {}
-        # with open(file, 'r') as fa:
-        #     line_count = 0
-        #     for line in fa:
-        #         line_count +=1
-        #         line = line.strip('\n')
-        #         # only get header lines
-        #         if line[0] == '>':
-        #             header_line = line
-        #         # populate dict with seq lines (non-header lines)
-        #         else:    
-        #             if header_line not in seq_dict:
-        #                 seq_dict[header_line] = line
-        #             else:
-        #                 seq_dict[header_line] += line
-        # # write out to file
-        # fa_one_line = open('fa_one_line.fa', 'w')
-        # for keys,vals in seq_dict.items():
-        #     fa_one_line.write(str(keys) + '\n' + str(vals) + '\n')
-        # fa_one_line.close()
-        # return len(seq_dict)

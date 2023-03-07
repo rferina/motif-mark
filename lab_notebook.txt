@@ -49,4 +49,75 @@ oneline opened
 changed mygene = Gene(oneline_fa) to mygene = Gene('fa_one_line.fa')
 and it ran! 
 
+printed out seq line lengths for test file:
+one_line complete
+gene1
+seq
+37
+gene2
+seq
+32
+gene3
+seq
+34
+oneline opened
 
+Those are short for drawing on pycairo, so made them longer:
+one_line complete
+gene1
+seq
+79
+gene2
+seq
+68
+gene3
+seq
+85
+oneline opened
+
+By switching gene_start, gene_stop, and gene_name to be in def init of Gene class, and using with open and defining the stop and start
+outside of a glass, made one Gene object per line of test fasta, and the output png shows the gene lines/names on top of each other.
+Need to make the new genes draw below each other.
+# define gene name as header line
+        if line[0] == '>':
+            gene_n = line
+            gene_n = gene_n.split('>')[1]
+        # define start and stop of gene from sequence line
+        elif line[0] != '>':
+            gene_beg = 20 # does this make sense with zero indexing?
+            gene_end = len(line) + gene_beg
+
+            gene_1 = Gene(testing_file, gene_beg, gene_end, gene_n )
+            print('made obj')
+            gene_1.draw_gene()
+            print('drew')
+
+output:
+one_line complete
+made obj
+drew
+made obj
+drew
+made obj
+drew
+
+able to identify exon start and stop using finditer:
+one_line complete
+made obj
+drew
+149 155
+made obj
+drew
+40 46
+made obj
+drew
+54 62
+
+But drawing the exons puts them all on the first gene. Also need to add 100 to the positions for drawing in line with the genes.
+
+I'm assuming the fasta files will only contain the cassette exon, and no other exons.
+Tried using gene number hack to draw the exons with the associated genes.
+Gene.gene_number gave this error
+AttributeError: type object 'Gene' has no attribute 'gene_number'
+
+But I did gene_1 = Gene() in the main, and changing it to gene_1.gene_number in the exon class worked!
