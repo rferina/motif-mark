@@ -24,28 +24,9 @@ motifs_file = args.motifs
 png_name = fasta_file.split(".")[0]
 png_name = png_name + '.png'
 
-
-
 # convert fasta file to one line fasta file
 oneline_file = bioinfo.oneline_fasta(fasta_file)
-# oneline_file.write()
 print('one_line complete')
-
-
-
-# with open(oneline_file, 'r') as testing_file:
-#     line_count = 0
-#     for line in testing_file:
-#         line_count +=1
-#         line = line.strip('\n')
-#         # define gene name as header line
-#         if line[0] == '>':
-#             print('header')
-#         # define start and stop of gene from sequence line
-#         elif line[0] != '>':
-#             print('seq')
-
-# print('oneline opened')
 
 def create_context(width, height):
     '''Takes in desired width and height, returns the context for drawing.'''
@@ -64,59 +45,32 @@ context.set_source_rgb(1, 1, 1)
 context.paint()
 context.restore()
 
+# add title to figure
+context.set_font_size(15)
+context.select_font_face("Arial",
+            cairo.FONT_SLANT_NORMAL,
+            cairo.FONT_WEIGHT_NORMAL)
+context.move_to(400, 20)
+context.show_text('Motif Marker Visualizer')
+
+colors = [[0, 1, 1, 0.5], [0.75, 0.24, 1, 0.5], [0.2, 0.63, 0.79, 0.5],
+           [0.41, 0.55, 0.13, 0.5], [1, 0.27, 0, 0.5], [0, 0, 1, 0.5]]
+
+y_list = [50, 75, 100, 125, 150, 175]
+
+for color, y in zip(colors, y_list):
+    context.set_line_width(25)
+    context.set_source_rgba(color[0], color[1], color[2], color[3])
+    context.move_to(800, y)        #(x,y)
+    context.line_to(810, y)
+    context.stroke()
+
+
+
 # context.rectangle(0, 0, 800, 1000)
 # context.set_source_rgb(1, 1, 1)
 # context.fill()
 
-# need to put in gene function
-# context.set_line_width(2)
-# context.move_to(100,75)        #(x,y)
-# context.line_to(600,75)
-# context.stroke()
-
-# # gene name
-# # context.set_font_size(0.25)
-# context.select_font_face("Arial",
-#                      cairo.FONT_SLANT_NORMAL,
-#                      cairo.FONT_WEIGHT_NORMAL)
-# context.move_to(50, 50)
-# context.show_text("Gene 1")
-
-# # exon 
-# context.set_line_width(10)
-# context.move_to(200,75)        #(x,y)
-# context.line_to(300,75)
-# context.stroke()
-
-# # motif
-# context.set_line_width(25)
-# context.set_source_rgba(4, 0, 4, 0.5)
-# context.move_to(100,75)        #(x,y)
-# context.line_to(105,75)
-# context.stroke()
-
-# motif
-
-
-
-        
-# class Identify:
-#     '''Parse clean fasta'''
-#     def __init__(self, oneline_fa) -> None:
-#         self.oneline_fa = oneline_fa
-    
-#     def parse_oneline(self):
-#         # while loop to read in two lines at a time
-#         header_dict = {}
-#         while True:
-#             header = self.oneline_fa.readline()
-#             seq = self.oneline_fa.readline()
-#             if not seq: break  
-#             # double check header is correct
-#             # if header[0] == '<':
-#             if header not in header_dict:
-#                 header_dict[header] = seq
-#         return header_dict
 
 
 class Gene:
@@ -156,72 +110,6 @@ class Gene:
             context.move_to(50, y_val-25)
             context.show_text(self.gene_name)
 
-    # def draw_gene(self, gene_start, gene_stop, gene_name):
-
-    #     with open(self.oneline_fa, 'r') as fa:
-    #         line_count = 0
-    #         for line in fa:
-    #             line_count +=1
-    #             line = line.strip('\n')
-    #             # define gene name as header line
-    #             if line[0] == '>':
-    #                 gene_name = line
-    #             # define start and stop of gene from sequence line
-    #             elif line[0] != '>':
-    #                 # if first character is lowercase, then can assume it's the start pos of the intron
-    #                 if line[0].islower() == True:
-    #                     gene_start = 0
-    #                     if line[-1].islower() == True:
-    #                         gene_stop = len(line)
-
-    #     # draw gene
-    #     context.set_line_width(2)
-    #     context.move_to(gene_start, 75)        #(x,y)
-    #     context.line_to(gene_stop, 75)
-    #     context.stroke()
-    #     # add gene name
-    #     context.set_font_size(15)
-    #     context.select_font_face("Arial",
-    #                  cairo.FONT_SLANT_NORMAL,
-    #                  cairo.FONT_WEIGHT_NORMAL)
-    #     context.move_to(50, 50)
-    #     context.show_text(gene_name)
-
-
-    # def identify(self, gene_start, gene_stop, gene_name):
-    #     # self.gene_start = gene_start
-    #     # self.gene_stop = gene_stop
-    #     # self.gene_name = gene_name
-
-    #     with open(self.oneline_fa, 'r') as fa:
-    #         line_count = 0
-    #         for line in fa:
-    #             line_count +=1
-    #             line = line.strip('\n')
-    #             # avoid header lines
-    #             if line[0] != '>':
-    #                 # if first character is lowercase, then can assume it's the start pos of the intron
-    #                 if line[0].islower() == True:
-    #                     gene_start = 20
-    #                     if line[-1].islower() == True:
-    #                         gene_stop = len(line)
-    #     return gene_start, gene_stop, gene_name
-
-    # def draw_gene(self):
-    #     # NEED TO FIGURE OUT HOW TO CHANGE y of LINE FOR DIFFERENT GENES
-    #     # draw gene
-    #     context.set_line_width(2)
-    #     context.move_to(gene_start, 75)        #(x,y)
-    #     context.line_to(gene_stop, 75)
-    #     context.stroke()
-    #     # add gene name
-    #     context.set_font_size(15)
-    #     context.select_font_face("Arial",
-    #                  cairo.FONT_SLANT_NORMAL,
-    #                  cairo.FONT_WEIGHT_NORMAL)
-    #     context.move_to(50, 50)
-    #     context.show_text(gene_name)
-
 
 class Exon(Gene):
     def __init__(self, exon_start, exon_stop):
@@ -235,18 +123,6 @@ class Exon(Gene):
         # self.path = path
         self.exon_start = exon_start
         self.exon_stop = exon_stop
-    
-    # def identify_exon(self):
-    #     with open(self, 'r') as fa:
-    #         line_count = 0
-    #         for line in fa:
-    #             line_count +=1
-    #             line = line.strip('\n')
-    #             # avoid header lines
-    #             if line[0] != '>':
-    #                 # if first character is lowercase, then can assume it's the start pos of the intron
-    #                 if line[0].islower() == True:
-    #                     print('yay')
 
     def draw_exon(self):
         if gene_1.gene_number == 1:
@@ -262,47 +138,8 @@ class Exon(Gene):
             context.move_to(self.exon_start, y_val)        #(x,y)
             context.line_to(self.exon_stop, y_val)
             context.stroke()
-#     def identify_exon(self):
-#         '''Takes in oneline fasta file, identifies the start and stop positions of the exon.'''
-#         with open(self, 'r') as fa:
-#             line_count = 0
-#             for line in fa:
-#                 line_count +=1
-#                 line = line.strip('\n')
-#                 # avoid header lines
-#                 if line[0] != '>':
-#                     # if first character is lowercase, then can assume it's the start pos of the intron
-#                     if line[0].islower() == True:
-#                         print('yay')
-#                         left_intron_start = 0
-#                         exon = re.search(r'\B[A-Z]\B', line) 
-#                         exon_start = exon.start()
 
 
-
-# class Line:
-#     '''Draws lines'''
-#     def __init__(self, start, stop, kind) -> None:
-#         self.start = start
-#         self.stop = stop
-#         self.kind = kind
-
-    # def draw(self, context, y):
-	#     '''Takes in context, draw a line on it which represents a gene, exon, motif etc'''
-	#     if self.kind == 'gene':
-    #         # draw gene from start and stop
-    #         print('exon starting at', self.start, 'stop at', self.stop)
-            # context.set_line_width(5)
-            # context.set_source_rgba(4, 0, 4, 0.5)
-            # context.move_to(100,75)        #(x,y)
-            # context.line_to(600,75)
-            # context.stroke()
-
-            # surface.write_to_png ("gene.png")
-		
-        # elif self.kind == 'exon':
-
-		# elif self.kind == 'motif'':
 
 class Motif:
     def __init__(self, motif_start, motif_stop) -> None:
@@ -313,6 +150,7 @@ class Motif:
         if gene_1.gene_number == 1:
             context.set_line_width(25)
             context.set_source_rgba(4, 0, 4, 0.5)
+            # context.set_source_rgba(colors)
             context.move_to(self.motif_start,75)        #(x,y)
             context.line_to(self.motif_stop,75)
             context.stroke()
@@ -320,34 +158,16 @@ class Motif:
             y_val = gene_1.gene_number * 75
             context.set_line_width(25)
             context.set_source_rgba(4, 0, 4, 0.5)
+            # context.set_source_rgba(colors)
             context.move_to(self.motif_start, y_val)        #(x,y)
             context.line_to(self.motif_stop, y_val)
             context.stroke()
 
-    # add motifs to dict
-    # motifs = []
-    # for spec in specs: #specifications 13,19,'motif'
-    #     motif= Line(*spec) # explode an array
-    #     # store motif obj in list
-    #     motifs.append(motif)
-
-    # convert to uppercase
-    # motif_option = ''
-    # self.motif = self.motif.upper()
-
-    # for nuc in self.motif:
-    #     if letter in nuc_dict:
-    #         motif_option += nuc_dict[nuc]
-    #     # no conversion
-    #     else:
-    #         motif_option += nuc
-    # return motif_option
+   
 # list of lists with unique colorsbc rbg lists, append to list, plug list into motifs color 
-# opacity .9
+
 # count to add one everytime thru seq, start -1; index motif_count
 
-# list of colors
-# start gene obj if not header line
 
 
 ########### RUN STUFF #####################################################################
@@ -477,73 +297,8 @@ surface.write_to_png (png_name)
 surface.finish()
 
 testing_file.close()
+motifs.close()
 ######################################################################################
-# class Exon:
-#     def __init__(self, path):
-#         """
-#         Takes in a file path and initializes an
-#         inverted index (a dictionary) with keys as the
-#         term and values as the list of documents with
-#         that term.
-#         """
-#         self.path = path
-
-#     def identify_exon(self):
-#         '''Takes in oneline fasta file, identifies the start and stop positions of the exon.'''
-#         with open(self, 'r') as fa:
-#             line_count = 0
-#             for line in fa:
-#                 line_count +=1
-#                 line = line.strip('\n')
-#                 # avoid header lines
-#                 if line[0] != '>':
-#                     # if first character is lowercase, then can assume it's the start pos of the intron
-#                     if line[0].islower() == True:
-#                         print('yay')
-#                         left_intron_start = 0
-#                         exon = re.search(r'\B[A-Z]\B', line) 
-#                         exon_start = exon.start()
-
-
-
-
-
-    # def ():
-    #     exon_start = Position.()
-    #     exon_stop = Position.()
-
-# class Intron:
-#     def __init__(self, path):
-#         """
-#         Takes in a file path and initializes an
-#         inverted index (a dictionary) with keys as the
-#         term and values as the list of documents with
-#         that term.
-#         """
-
-# class Motif:
-#     def __init__(self, path):
-#         """
-#         Takes in a file path and initializes an
-#         inverted index (a dictionary) with keys as the
-#         term and values as the list of documents with
-#         that term.
-#         """
-#     def translate(motif):
-#         '''Takes in a motif, and returns motif options if the 
-#         motif contains an ambiguous character (y). Otherwise 
-#         returns the original motif.'''
-        # put variations in list, see if in seq??
-        # if line contains something not ACTGU?
-        # if line has all caps
-        # if motif.isupper() == True:
-        #     substitute
-        #     findall
-        # else: 
-        #     motif_up = motif.upper()
-
-
-
 
 ##############################################################################################
 
