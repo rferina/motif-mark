@@ -127,3 +127,10 @@ Added gene 4 to test file to try ambiguous motifs.
 Tried adding colors list as the argument for colors, didn't work. Need to iterate through it somehow.
  context.set_source_rgba(colors)
 TypeError: Context.set_source_rgba() takes at least 3 arguments (1 given)
+
+previously had:
+class Exon(Gene):
+
+trying to change it to class Exon(): and seeing if it still works.
+
+Looks like it still works!
