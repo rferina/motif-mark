@@ -130,6 +130,8 @@ class Gene:
     def draw_gene(self):
         # draw gene
         context.set_line_width(2)
+        context.set_source_rgba(0, 0, 0)
+
         if self.gene_number == 1:
             context.move_to(self.gene_start, 75)        #(x,y)
             context.line_to(self.gene_stop, 75)
@@ -249,11 +251,13 @@ class Exon(Gene):
     def draw_exon(self):
         if gene_1.gene_number == 1:
             context.set_line_width(10)
+            context.set_source_rgba(0, 0, 0)
             context.move_to(self.exon_start,75)        #(x,y)
             context.line_to(self.exon_stop,75)
             context.stroke()
         elif gene_1.gene_number > 1:
             context.set_line_width(10)
+            context.set_source_rgba(0, 0, 0)
             y_val = gene_1.gene_number * 75
             context.move_to(self.exon_start, y_val)        #(x,y)
             context.line_to(self.exon_stop, y_val)
@@ -304,7 +308,7 @@ class Motif:
     def __init__(self, motif_start, motif_stop) -> None:
         self.motif_start = motif_start
         self.motif_stop = motif_stop
-        
+
     def draw_motifs(self):
         if gene_1.gene_number == 1:
             context.set_line_width(25)
@@ -338,14 +342,15 @@ class Motif:
     #     else:
     #         motif_option += nuc
     # return motif_option
-
+# list of lists with unique colorsbc rbg lists, append to list, plug list into motifs color 
+# opacity .9
+# count to add one everytime thru seq, start -1; index motif_count
 
 # list of colors
 # start gene obj if not header line
 
 
 ########### RUN STUFF #####################################################################
-# Position(fasta_file)
 # mygene = Gene(600, 'gene ayooo')
 # mygene.identify()
 # mygene.draw_gene()
@@ -360,13 +365,48 @@ class Motif:
 # mymotif = Motif(100, 105)
 # mymotif.draw_motifs()
 
-# print(Identify(oneline_file))
-# print('identified')
 
+# IUPAC dictionary
+iupac_dict = {
+    "A": "[Aa]",
+    "C": "[Cc]",
+    "G": "[Gg]",
+    "T": "[Tt]",
+    "U": "[UuTt]",
+    "W": "[AaTtUu]",
+    "S": "[CcGg]",
+    "M": "[AaCc]",
+    "K": "[GgTtUu]",
+    "R": "[AaGg]",
+    "Y": "[CcTtUu]",
+    "B": "[CcGgTt]",
+    "D": "[AaGgTtUu]",
+    "H": "[AaCcTtUu]",
+    "V": "[AaCcGg]",
+    "N": "[AaCcGgTtUu]",
+    "Z": "[]"
+}
 
+# .replace with all
 
-
-
+# open motif file
+motifs = open(motifs_file, 'r')
+line_number = 0
+motifs_list = []
+for entry in motifs:
+    line_number += 1
+    entry = entry.strip('\n')
+    # translate motif entries if needed
+    motif_option = ''
+    for nuc in entry:
+        if nuc in iupac_dict.keys():
+            motif_option += iupac_dict[nuc]
+        # no conversion
+        else:
+            motif_option += nuc
+        
+    motifs_list.append(motif_option) 
+print('motifs list', motifs_list)
 
 # with open, generate Gene obj for each line
 testing_file = open('fa_one_line.fa', 'r')
@@ -389,7 +429,6 @@ for line in testing_file:
             print('made obj')
             gene_1.draw_gene()
             print('drew')
-
             print(gene_1.gene_number)
             # define exon terms
             exon_indexes = []
@@ -400,29 +439,44 @@ for line in testing_file:
                 myexon = Exon(ex_st, ex_en)
                 myexon.draw_exon()
             print(ex_st, ex_en)
-            # exon = re.search(r'\B[A-Z]\B', line) 
-            # exon_beg = exon.start()
-            # exon_end = 
-            # make exon object
-            # myexon = Exon(ex_st, ex_en)
-            # myexon.draw_exon()
-
-
-
-# with open(oneline_file, 'r') as one_fq:
-#     line_count = 0
-#     for line in fa:
-        # line_count +=1
-        # line = line.strip('\n')
-        # # for sequence line, initiate a gene object
-        # if line[0] != '>':
-        #     gene = Gene()
+            # look for motifs
+            for motif in motifs_list:
+                motif_indexes = {}
+                motif_list_ind = [] 
+                for match in re.finditer(motif, line.upper()):
+                    # add motif indexes to a list of tuples to record motifs
+                    # being present in sequence lines multiple times
+                    motif_list_ind.append((match.start()+100, match.end()+100))
+                    # dictionary with key as motif, value as list of tuples of motif indexes
+                    if motif not in motif_indexes:
+                        motif_indexes[motif] = motif_list_ind
+                print(motif_indexes)
+                # for motifs on each gene, draw all
+                for keys in motif_indexes.keys():
+                    if len(motif_indexes[keys]) == 1:
+                        motif_count = len(motif_indexes[keys])
+                        motif_start = motif_indexes[keys][0][0]
+                        motif_stop = motif_indexes[keys][0][1]
+                        mymotif = Motif(motif_start, motif_stop)
+                        mymotif.draw_motifs()
+                    elif len(motif_indexes[keys]) > 1:
+                        motif_count = len(motif_indexes[keys])
+                        # iterate through the list of tuples in the motif dictionary values
+                        for i in range(len(motif_indexes[keys])):
+                            motif_start_i = motif_indexes[keys][i][0]
+                            motif_stop_i = motif_indexes[keys][i][1]
+                            mymotif2 = Motif(motif_start_i, motif_stop_i)
+                            mymotif2.draw_motifs()
+        
+                
+      
 
 
 # complete drawing
 surface.write_to_png (png_name)
 surface.finish()
 
+testing_file.close()
 ######################################################################################
 # class Exon:
 #     def __init__(self, path):
@@ -646,7 +700,18 @@ test='aaaBDBcc' # 3-5
     # result = re.sub('y', 't', input) 
     # result2 = re.sub('y', 'c', input)
 
+# seq = 'aaaaaaaaCACGGTTGGCACaaaaa'
+# mot_test = ['CAC', 'TT']
+# for m in mot_test:
+#     mot_indexes = {}
+#     mot_list = []
+#     for match in re.finditer(m, seq):
+#         mot_list.append((match.start()+100, match.end()+100))
+#         if m not in mot_indexes:
+#             mot_indexes[m] = mot_list
+#     print(mot_indexes)
 
 
 # newObject = originalString.replace('character to replace', 'character to be replaced with, count of replacements to perform)
 
+# append all instances to list, then put list as dict val

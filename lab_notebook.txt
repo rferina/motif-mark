@@ -121,3 +121,5 @@ Gene.gene_number gave this error
 AttributeError: type object 'Gene' has no attribute 'gene_number'
 
 But I did gene_1 = Gene() in the main, and changing it to gene_1.gene_number in the exon class worked!
+
+Added gene 4 to test file to try ambiguous motifs.
