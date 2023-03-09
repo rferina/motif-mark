@@ -285,7 +285,6 @@ for line in fasta_one_line_file:
                     motif_count = len(motif_indexes[keys])
                     # if there's only one instance of the motif
                     if motif_count == 1:
-                        # motif_count = len(motif_indexes[keys])
                         motif_start = motif_indexes[keys][0][0]
                         motif_stop = motif_indexes[keys][0][1]
                         # generate motif object, draw motif
@@ -297,7 +296,7 @@ for line in fasta_one_line_file:
                         context.move_to(1115, y_value)        #(x,y)
                         context.line_to(1125, y_value)
                         context.stroke()
-                        # add motif label to legend
+                        # add untranslated motif label to legend
                         context.set_source_rgba(0, 0, 0)
                         context.set_font_size(10)
                         context.select_font_face("Arial",
@@ -318,7 +317,7 @@ for line in fasta_one_line_file:
                             context.move_to(1115, y_value)        #(x,y)
                             context.line_to(1125, y_value)
                             context.stroke()
-                            # add motif label to legend
+                            # add untranslated motif label to legend
                             context.set_source_rgba(0, 0, 0)
                             context.set_font_size(10)
                             context.select_font_face("Arial",
