@@ -1,5 +1,5 @@
 # Motif-Marker Visualizer
-### Rachel Ferina
+#### Rachel Ferina
 
 ## Overview
 
@@ -9,7 +9,8 @@ Among other elements, a gene includes exons, which are regions that code for pro
 casette exons. Casette exons can be alternatively spliced, remaining either in or out of the gene depending on developmental stage and the environment. Motifs are small repeating patterns of sequences that can serve as binding sites of regulatory proteins. When regulatory proteins bind to motifs, it can activate or suppress the inclusion of exons.
 
 This script assumes the input FASTA file contains the sequence of the casette exon, and parts of the surrounding introns. It also assumes the 
-sequences are all in the same orientation (reverse complement is not accounted for).
+sequences are all in the same orientation (reverse complement is not accounted for). It assumes exons are represented with all capital letters,
+introns are represented with lowercase letters, and motifs can be represented by lowercase and/or uppercase letters.
 
 The gene is mapped in the output figure, along with the casette exon. Which motifs are present in all the genes are shown in different colors.
 This figure is drawn to scale. Note that 100 was added to every position so the drawings weren't off the page.
@@ -25,13 +26,13 @@ The conda environment my_pycairo must be activated, which includes Pycairo versi
 
 The conda environment must first be activated.
     
-    **conda activate my_pycairo**
+    conda activate my_pycairo
 
 To run the script, the following argparse arguments must be specified.
 
-    **-f: the input fasta filename**
-    **-m: the input motif filename**
+    -f: the input fasta filename
+    -m: the input motif filename
 
 Full example:
 
-    **python motif-mark-oop.py -f test_fa.fasta -m test_motif.txt**
+    python motif-mark-oop.py -f test_fa.fasta -m test_motif.txt
