@@ -12,9 +12,6 @@ def get_args():
     parser.add_argument('-m', '--motifs', help='specify motif file')
     return parser.parse_args()
 
-# conda activate my_pycairo
-# command to run: python motif-mark-oop.py -f test_fa.fasta -m test_motif.txt
-# python motif-mark-oop.py -f Figure_1.fasta -m Fig_1_motifs.txt
 
 args = get_args()
 
@@ -27,7 +24,6 @@ png_name = png_name + '.png'
 
 # convert fasta file to one line fasta file
 oneline_file = bioinfo.oneline_fasta(fasta_file)
-print('one_line complete')
 
 def create_context(width, height):
     '''Takes in desired width and height, returns the surface and context for pycairo drawing.'''
@@ -38,7 +34,7 @@ def create_context(width, height):
     return surface, context
 
 # create context to draw on
-surface, context = create_context(1200, 1200)
+surface, context = create_context(1300, 1200)
 
 # make background white
 context.save()
@@ -55,17 +51,42 @@ context.move_to(500, 20)
 context.show_text('Motif Marker Visualizer')
 
 # make legend
-colors = [[0, 1, 1, 0.5], [0.75, 0.24, 1, 0.5], [0.2, 0.63, 0.79, 0.5],
-           [0.41, 0.55, 0.13, 0.5], [1, 0.27, 0, 0.5], [0, 0, 1, 0.5]]
+context.set_font_size(13)
+context.select_font_face("Arial",
+            cairo.FONT_SLANT_NORMAL,
+            cairo.FONT_WEIGHT_NORMAL)
+context.move_to(1115, 25)
+context.show_text('Legend')
 
-y_list = [50, 75, 100, 125, 150, 175]
+# legend intron label
+context.set_line_width(2)
+context.set_source_rgba(0, 0, 0)
+context.move_to(1115, 50)        #(x,y)
+context.line_to(1125, 50)
+context.stroke()
+context.set_font_size(10)
+context.select_font_face("Arial",
+            cairo.FONT_SLANT_NORMAL,
+            cairo.FONT_WEIGHT_NORMAL)
+context.move_to(1130, 50)
+context.show_text('Intron')
 
-for color, y in zip(colors, y_list):
-    context.set_line_width(25)
-    context.set_source_rgba(color[0], color[1], color[2], color[3])
-    context.move_to(1115, y)        #(x,y)
-    context.line_to(1125, y)
-    context.stroke()
+# legend exon label
+context.set_line_width(10)
+context.set_source_rgba(0, 0, 0)
+context.move_to(1115, 75)        #(x,y)
+context.line_to(1125, 75)
+context.stroke()
+context.set_font_size(10)
+context.select_font_face("Arial",
+            cairo.FONT_SLANT_NORMAL,
+            cairo.FONT_WEIGHT_NORMAL)
+context.move_to(1130, 75)
+context.show_text('Exon')
+
+# define colors for motifs
+colors = [[0, 1, 1, 0.8], [0.75, 0.24, 1, 0.8], [0, 0, 1, 0.8],
+           [0.41, 0.55, 0.13, 0.8], [1, 0.27, 0, 0.8], [0.2, 0.63, 0.79, 0.8]]
 
 
 class Gene:
@@ -146,10 +167,11 @@ class Exon:
 class Motif:
     '''This class represents the motifs that can be found in a gene's sequence in a FASTA file. It has a method to draw
     the motifs to scale via Pycairo, with unique colors for each motif.'''
-    def __init__(self, motif_start, motif_stop) -> None:
-        '''Takes in and initializes the motif start and stop positions.'''
+    def __init__(self, motif_start, motif_stop, m_color) -> None:
+        '''Takes in and initializes the motif start and stop positions, as well as unique color for the motif.'''
         self.motif_start = motif_start
         self.motif_stop = motif_stop
+        self.m_color = m_color
 
     def draw_motifs(self):
         '''Returns the motifs drawing.'''
@@ -157,9 +179,7 @@ class Motif:
         if gene_1.gene_number == 1:
             motif_count += 1
             context.set_line_width(25)
-            # context.set_source_rgba(4, 0, 4, 0.5)
-            context.set_source_rgba(colors[motif_count][0], colors[motif_count][1], colors[motif_count][2], colors[motif_count][3])
-
+            context.set_source_rgba(self.m_color[0], self.m_color[1], self.m_color[2], self.m_color[3])
             context.move_to(self.motif_start, 75)        #(x,y)
             context.line_to(self.motif_stop, 75)
             context.stroke()
@@ -167,18 +187,10 @@ class Motif:
             motif_count += 1
             y_val = gene_1.gene_number * 75
             context.set_line_width(25)
-            # context.set_source_rgba(4, 0, 4, 0.5)
-            context.set_source_rgba(colors[motif_count][0], colors[motif_count][1], colors[motif_count][2], colors[motif_count][3])
+            context.set_source_rgba(self.m_color[0], self.m_color[1], self.m_color[2], self.m_color[3])
             context.move_to(self.motif_start, y_val)        #(x,y)
             context.line_to(self.motif_stop, y_val)
             context.stroke()
-
-   
-# list of lists with unique colorsbc rbg lists, append to list, plug list into motifs color 
-
-# count to add one everytime thru seq, start -1; index motif_count
-
-# need color to be associated with motif, not gene
 
 
 # IUPAC dictionary for ambiguous motifs
@@ -202,13 +214,21 @@ iupac_dict = {
     "Z": "[]"
 }
 
+# list of y values to draw motif legend
+y_list = [100, 125, 150, 175, 200, 225]
+
 # open motif file, generate list of possible motifs
 motifs = open(motifs_file, 'r')
 line_number = 0
 motifs_list = []
+untranslated_motif_list = []
 for entry in motifs:
     line_number += 1
     entry = entry.strip('\n')
+    # make untranslated motif list to later label motifs in the legend
+    untranslated_motif_list.append(entry)
+    # make motifs uppercase to check if they're in ipauc diciontary
+    entry = entry.upper()
     # translate ambiguous motif entries if needed
     motif_option = ''
     for nuc in entry:
@@ -218,7 +238,6 @@ for entry in motifs:
         else:
             motif_option += nuc   
     motifs_list.append(motif_option) 
-print('motifs list', motifs_list)
 
 # open one line fasta file, generate Gene object for each sequence line
 fasta_one_line_file = open('fa_one_line.fa', 'r')
@@ -235,26 +254,24 @@ for line in fasta_one_line_file:
         elif line[0] != '>':
             gene_beg = 100 
             gene_end = len(line) + gene_beg
+            # gene number keeps track of what gene the file is on
             gene_num += 1
             # make gene object for each sequence line, draw genes
             gene_1 = Gene(fasta_one_line_file, gene_beg, gene_end, gene_id, gene_num)
-            print('made obj')
             gene_1.draw_gene()
-            print('drew')
-            print(gene_1.gene_number)
-            # identify start and stop positions of exons
+            # identify start and stop positions of exons 
             exon_indexes = []
             for match in re.finditer(r'[A-Z]', line):
                 exon_indexes.append(match.start())
-                ex_st = exon_indexes[0] + 100
-                ex_en = exon_indexes[-1] + 100
+                ex_start = exon_indexes[0] + 100
+                ex_end = exon_indexes[-1] + 100
                 # generate Exon objects and draw them
-                myexon = Exon(ex_st, ex_en)
+                myexon = Exon(ex_start, ex_end)
                 myexon.draw_exon()
             # look for motifs in the sequence lines
-            for motif in motifs_list:
+            for motif, color, y_value, normal_motif in zip(motifs_list, colors, y_list, untranslated_motif_list):
                 motif_indexes = {}
-                motif_list_ind = [] 
+                motif_list_ind = []
                 for match in re.finditer(motif, line.upper()):
                     # add motif indexes to a list of tuples to record motifs
                     # being present in sequence lines multiple times
@@ -262,28 +279,53 @@ for line in fasta_one_line_file:
                     # dictionary with key as motif, value as list of tuples of motif indexes
                     if motif not in motif_indexes:
                         motif_indexes[motif] = motif_list_ind
-                print(motif_indexes)
                 # for motifs on each gene, draw all the motifs
                 for keys in motif_indexes.keys():
+                    # motif count is how many instances there are of one motif
+                    motif_count = len(motif_indexes[keys])
                     # if there's only one instance of the motif
-                    if len(motif_indexes[keys]) == 1:
-                        motif_count = len(motif_indexes[keys])
+                    if motif_count == 1:
+                        # motif_count = len(motif_indexes[keys])
                         motif_start = motif_indexes[keys][0][0]
                         motif_stop = motif_indexes[keys][0][1]
                         # generate motif object, draw motif
-                        mymotif = Motif(motif_start, motif_stop)
+                        mymotif = Motif(motif_start, motif_stop, color)
                         mymotif.draw_motifs()
+                        # draw motif color on legend
+                        context.set_line_width(25)
+                        context.set_source_rgba(color[0], color[1], color[2], color[3])
+                        context.move_to(1115, y_value)        #(x,y)
+                        context.line_to(1125, y_value)
+                        context.stroke()
+                        # add motif label to legend
+                        context.set_source_rgba(0, 0, 0)
+                        context.set_font_size(10)
+                        context.select_font_face("Arial",
+                                    cairo.FONT_SLANT_NORMAL,
+                                    cairo.FONT_WEIGHT_NORMAL)
+                        context.move_to(1130, y_value)
+                        context.show_text(normal_motif)
                     # if there's multiple instances of the motif
-                    elif len(motif_indexes[keys]) > 1:
-                        motif_count = len(motif_indexes[keys])
+                    elif motif_count > 1:
                         # iterate through the list of tuples in the motif dictionary values
-                        for i in range(len(motif_indexes[keys])):
-                            motif_start_i = motif_indexes[keys][i][0]
-                            motif_stop_i = motif_indexes[keys][i][1]
+                        for i in range(motif_count):
                             # generate motif objects, draw the multiple motifs
-                            mymotif2 = Motif(motif_start_i, motif_stop_i)
+                            mymotif2 = Motif(motif_indexes[keys][i][0], motif_indexes[keys][i][1], color)
                             mymotif2.draw_motifs()
-        
+                            # draw motif color on legend
+                            context.set_line_width(25)
+                            context.set_source_rgba(color[0], color[1], color[2], color[3])
+                            context.move_to(1115, y_value)        #(x,y)
+                            context.line_to(1125, y_value)
+                            context.stroke()
+                            # add motif label to legend
+                            context.set_source_rgba(0, 0, 0)
+                            context.set_font_size(10)
+                            context.select_font_face("Arial",
+                                        cairo.FONT_SLANT_NORMAL,
+                                        cairo.FONT_WEIGHT_NORMAL)
+                            context.move_to(1130, y_value)
+                            context.show_text(normal_motif)
 
 # complete drawing
 surface.write_to_png (png_name)

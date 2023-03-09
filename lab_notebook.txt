@@ -1,4 +1,11 @@
+Rachel Ferina Lab Notebook
 
+Python version: Python 3.10.9 
+Environment: my_pycairo
+
+6 March 2023
+
+Having trouble reading in the oneline fasta file.
 
 File "/home/rfer22/bioinfo/Bi625/motif/motif-mark/motif-mark-oop.py", line 107, in identify
     with open(self, 'r') as fa:
@@ -18,8 +25,6 @@ File "/home/rfer22/bioinfo/Bi625/motif/motif-mark/motif-mark-oop.py", line 256, 
 NameError: name 'gene_start' is not defined
 
 trying combining the identify and draw functions.
-
-
 
 Tried this, still getting error 9, testing_file = open(oneline_fa, 'r')
 
@@ -123,6 +128,8 @@ AttributeError: type object 'Gene' has no attribute 'gene_number'
 But I did gene_1 = Gene() in the main, and changing it to gene_1.gene_number in the exon class worked!
 
 Added gene 4 to test file to try ambiguous motifs.
+
+7 March 2023
 
 Tried adding colors list as the argument for colors, didn't work. Need to iterate through it somehow.
  context.set_source_rgba(colors)
